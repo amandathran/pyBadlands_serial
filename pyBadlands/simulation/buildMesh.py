@@ -48,9 +48,6 @@ def construct_mesh(input, filename, verbose=False):
                 input.rockNb, input.tDisplay, input.carbValSp1, input.carbValSp2,
                 input.carbTime, input.waveSed)
 
-    print("force.rivQw")
-    print(force.rivQw)
-
     if input.disp3d:
         force.time3d = input.time3d
         if input.merge3d == 0. or input.merge3d > recGrid.resEdges:

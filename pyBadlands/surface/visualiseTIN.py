@@ -181,7 +181,6 @@ def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff
             f["waveS"][:,0] = waveS
             f.create_dataset('cumwave',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["cumwave"][:,0] = wavediff
-            print("placeholder - delete temporary mobile layer")
             f.create_dataset('waveMobile',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["waveMobile"][:,0] = waveQs
 
@@ -305,7 +304,6 @@ def write_hdf5_flexure(folder, h5file, step, coords, elevation, rain, discharge,
             f["waveS"][:,0] = waveS
             f.create_dataset('cumwave',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["cumwave"][:,0] = wavediff
-            print("placeholder - delete temporary mobile layer")
             f.create_dataset('waveMobile',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["waveMobile"][:,0] = waveQs
 

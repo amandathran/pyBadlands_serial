@@ -31,7 +31,6 @@ def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
     fillH = None
 
     # Update river input
-    print("***calling getRivers()")
     force.getRivers(tNow)
     riverrain = rain+force.rivQw
 

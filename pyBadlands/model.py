@@ -83,14 +83,8 @@ class Model(object):
         self.inGIDs, self.totPts, self.elevation, self.cumdiff, self.cumhill, self.cumfail, self.cumflex, self.strata, self.mapero, \
         self.tinFlex, self.flex, self.wave, self.straTIN, self.carbTIN = buildMesh.construct_mesh(self.input, filename, verbose)
 
-        print("min(self.FVmesh.control_volumes)")
-        print(min(self.FVmesh.control_volumes))
-        print("max(self.FVmesh.control_volumes)")
-        print(max(self.FVmesh.control_volumes))
-
         if self.input.waveSed:
             self.wavediff = np.zeros((self.totPts))
-            print("placeholder - remove waveQs twice")
             self.waveQs = np.zeros((self.totPts))
         else:
             self.wavediff = None
@@ -453,10 +447,7 @@ class Model(object):
                 print("   - Compute carbonate growth %0.02f seconds" % (time.clock() - carbtime))
 
             # Compute stream network
-            print("***calling streamflow")
             print("tNow = %s" % self.tNow)
-            print("***self.tstepFlux***")
-            print(self.tstepFlux)
             self.fillH, self.elevation = buildFlux.streamflow(self.input, self.FVmesh, self.recGrid, self.force, self.hillslope, \
                                               self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, verbose)
 

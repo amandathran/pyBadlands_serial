@@ -78,8 +78,6 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
         meanH = force.meanH[lGIDs]
         meanS = force.meanS[lGIDs]
         wdiff = wavediff[lGIDs]
-        print("placeholder: remove waveQs (temporary layer) from this function and\
-        where it is called in model.py")
         waveQs = waveQs[lGIDs]
     else:
         waveOn = False
