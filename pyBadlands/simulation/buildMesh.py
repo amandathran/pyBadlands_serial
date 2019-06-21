@@ -46,7 +46,7 @@ def construct_mesh(input, filename, verbose=False):
                 input.tectTime, recGrid.regX, recGrid.regY, input.riverPos,
                 input.riverTime, input.riverQws, input.riverRck, input.riverNb,
                 input.rockNb, input.tDisplay, input.carbValSp1, input.carbValSp2,
-                input.carbTime, input.waveSed)
+                input.carbTime, input.waveSed, input.tStart)
 
     if input.disp3d:
         force.time3d = input.time3d
@@ -122,9 +122,12 @@ def construct_mesh(input, filename, verbose=False):
 
     # Wavesed grid initialisation
     if input.waveSed:
+        print("initializing regular wave mesh")
         ref_elev = _get_reference_elevation(input,recGrid,elevation)
         wave = _init_wavesed(input,ref_elev, recGrid, force, verbose)
         wave.build_tree(FVmesh.node_coords[:,:2])
+        print("wave.wxyTIN.shape")
+        print(wave.wxyTIN.shape)
 
     # Stratigraphic TIN initialisation
     if input.rockNb > 0:

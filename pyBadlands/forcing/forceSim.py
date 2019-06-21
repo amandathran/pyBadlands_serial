@@ -116,8 +116,9 @@ class forceSim:
                  windx = None, windy = None, tauc = None, tauf = None, nm = None, cw = None, hw = None,
                  ortime = None, MapDisp = None, TimeDisp = None, regX = None, regY = None, rivPos = None,
                  rivTime = None, rivQws = None, riverRck=None, rivNb = 0, rockNb = 0, Tdisplay = 0.,
-                 carbValSp1 = None, carbValSp2 = None, TimeCarb = None, wavesOn=None):
+                 carbValSp1 = None, carbValSp2 = None, TimeCarb = None, wavesOn=None, tStart = None):
 
+        self.tStart = None
         self.regX = regX
         self.regY = regY
         self.xi, self.yi = numpy.meshgrid(regX, regY, indexing='xy')
@@ -189,6 +190,7 @@ class forceSim:
         self.meanV = None
         self.meanS = None
         self.wavPerc = None
+        self.waveFlux = None
 
         self.carbValSp1 = carbValSp1
         self.carbValSp2 = carbValSp2
@@ -259,7 +261,13 @@ class forceSim:
 
         return
 
-    def getRivers(self, time):
+    def initWaveFlux(self, inIDs):
+        self.waveFlux = numpy.zeros((len(self.tXY)), dtype=float)
+
+        return
+
+
+    def getRivers(self, time, tWave, tStart):
         """
         Finds for a given time the active rivers and allocates corresponding points with
         water and sediment discharge values.
@@ -297,8 +305,33 @@ class forceSim:
                     self.rivQw[ids[r]] += riv_qw
                     self.rivQs[ids[r],rivRock] += riv_qs
 
+        # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
+        self.tStart = tStart
+
+        print("self.waveFlux.shape")
+        print(self.waveFlux.shape)
+
+        print("self.rivQs.shape")
+        print(self.rivQs.shape)
+
         if self.wavesOn:
-            print('waveSed is on - this logic works')
+            if time != self.tStart and time+tWave == self.next_wave:
+                # Don't clear waveFlux - filled in model.py
+                pass
+            else:
+                # Clear waveFlux
+                self.waveFlux = numpy.zeros((len(self.tXY)))
+
+            tmp = self.waveFlux.reshape(len(self.waveFlux),1)
+            self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
+
+            print("self.rivQs.shape")
+            print(self.rivQs.shape)
+            print("adding max wave flux of %s to rivQs" % max(self.waveFlux))
+            print("max(self.rivQs)")
+            print(max(self.rivQs))
+
+
 
     def update_force_TIN(self, tXY):
         """
@@ -322,9 +355,6 @@ class forceSim:
         ----------
         time : float
             Requested time interval rain map to load.
-
-        elev : float
-            Unstructured grid (TIN) Z coordinates.
 
         inDs : integer
             List of unstructured vertices contained in each partition.
@@ -350,6 +380,9 @@ class forceSim:
         return tinCarbSp1, tinCarbSp2
 
     def get_Rain(self, time, elev, inIDs):
+
+        print("calling get_Rain")
+
         """
         Get rain value for a given period and perform interpolation from regular grid to unstructured TIN one.
 
@@ -397,6 +430,9 @@ class forceSim:
             rectRain = numpy.reshape(rainMap.values,(len(self.regX), len(self.regY)),order='F')
             tinRain = interpolate.interpn( (self.regX, self.regY), rectRain, self.tXY[inIDs,:], method='linear')
             self.next_rain = self.T_rain[event,1]
+
+        print("tinRain.shape")
+        print(tinRain.shape)
 
         return tinRain
 

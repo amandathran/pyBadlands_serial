@@ -85,10 +85,8 @@ class Model(object):
 
         if self.input.waveSed:
             self.wavediff = np.zeros((self.totPts))
-            self.waveQs = np.zeros((self.totPts))
         else:
             self.wavediff = None
-            self.waveQs = None
 
         # Define hillslope parameters
         self.rain = np.zeros(self.totPts, dtype=float)
@@ -274,6 +272,10 @@ class Model(object):
                 self.rain = np.zeros(self.totPts, dtype=float)
                 self.rain[self.inIDs] = self.force.get_Rain(self.tNow, self.elevation, self.inIDs)
 
+            # Initialize waveFlux at tStart
+            if self.tNow == self.input.tStart:
+                self.force.initWaveFlux(self.inIDs)
+
             # Load tectonic grid
             if not self.input.disp3d:
                 # Vertical displacements
@@ -374,16 +376,19 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                print("waveED originally added to cumulative ero/dep here")
+                print("waveED originally added to cumulative ero/dep here - make sure you account for erosion")
 
                 # Extract wave-mobilized sediments to trigger hyperpycnal flows
-                # Keep only positive elevations
+                # All the nodes where the waves transfer sediments in will be
+                # incorporated/deposited within the flow network
                 waveDep = np.where(waveED>0, waveED, 0)
-                self.waveQs = np.multiply(waveDep,self.FVmesh.control_volumes)/self.input.tWave
+                self.force.waveFlux = np.multiply(waveDep,self.FVmesh.control_volumes)/self.input.tWave
 
-                #self.elevation += waveED
-                #self.cumdiff  += waveED
-                #self.wavediff  += waveED
+                # Account for wave erosion in final elevation change
+                waveEro = np.where(waveED<0, waveED, 0)
+                self.elevation += waveEro
+                self.cumdiff  += waveEro
+                self.wavediff  += waveEro
                 print("   - Compute wave-induced sediment transport %0.02f seconds" % (time.clock() - wavetime))
                 # Update carbonate active layer
                 if nactlay is not None:
@@ -447,7 +452,6 @@ class Model(object):
                 print("   - Compute carbonate growth %0.02f seconds" % (time.clock() - carbtime))
 
             # Compute stream network
-            print("tNow = %s" % self.tNow)
             self.fillH, self.elevation = buildFlux.streamflow(self.input, self.FVmesh, self.recGrid, self.force, self.hillslope, \
                                               self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, verbose)
 
@@ -458,7 +462,7 @@ class Model(object):
                 checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow,
                                             self.FVmesh, self.tMesh, self.force, self.flow, self.rain,
                                             self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff,
-                                            self.outputStep, self.prop, self.mapero, self.cumflex, self.waveQs)
+                                            self.outputStep, self.prop, self.mapero, self.cumflex)
 
                 if self.straTIN is not None and self.outputStep % self.input.tmesh==0:
                     meshtime = time.clock()

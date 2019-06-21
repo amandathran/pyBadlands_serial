@@ -18,7 +18,7 @@ from pyBadlands import (visualiseFlow, visualiseTIN, eroMesh)
 def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
                       tMesh, force, flow, rain, elevation, fillH, \
                       cumdiff, cumhill, cumfail, wavediff, step, prop, \
-                      mapero=None, cumflex=None, waveQs=None):
+                      mapero=None, cumflex=None):
     """
     Create the checkpoint files (used for HDF5 output).
     """
@@ -78,12 +78,13 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
         meanH = force.meanH[lGIDs]
         meanS = force.meanS[lGIDs]
         wdiff = wavediff[lGIDs]
-        waveQs = waveQs[lGIDs]
+        waveQs = force.waveFlux[lGIDs]
     else:
         waveOn = False
         meanH = None
         meanS = None
         wdiff = None
+        waveQs = None
 
     if input.flexure:
         visualiseTIN.write_hdf5_flexure(input.outDir, input.th5file, step, tMesh.node_coords[:,:2],

@@ -169,6 +169,8 @@ class waveSed():
 
     def compute_wavesed(self,tNow,input,force,elev,actlay):
 
+        print("calling compute_wavesd()")
+
         self.sealvl = force.sealevel
 
         # t1 = time.clock()
