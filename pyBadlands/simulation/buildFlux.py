@@ -31,6 +31,7 @@ def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
     fillH = None
 
     # Update river input
+    print("***calling getRivers()")
     force.getRivers(tNow)
     riverrain = rain+force.rivQw
 
@@ -345,4 +346,4 @@ def sediment_flux(input, recGrid, hillslope, FVmesh, tMesh, flow, force, rain, l
     if verbose:
         print(" - Flow computation ", time.clock() - flow_time)
 
-    return tNow,elevation,cumdiff,cumhill,cumfail
+    return tNow,elevation,cumdiff,cumhill,cumfail,timestep

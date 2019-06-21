@@ -116,7 +116,7 @@ class forceSim:
                  windx = None, windy = None, tauc = None, tauf = None, nm = None, cw = None, hw = None,
                  ortime = None, MapDisp = None, TimeDisp = None, regX = None, regY = None, rivPos = None,
                  rivTime = None, rivQws = None, riverRck=None, rivNb = 0, rockNb = 0, Tdisplay = 0.,
-                 carbValSp1 = None, carbValSp2 = None, TimeCarb = None):
+                 carbValSp1 = None, carbValSp2 = None, TimeCarb = None, wavesOn=None):
 
         self.regX = regX
         self.regY = regY
@@ -180,6 +180,7 @@ class forceSim:
         self.time_display = Tdisplay
 
         self.wclim = 0
+        self.wavesOn = wavesOn
         self.wavU = None
         self.wavV = None
         self.wavH = None
@@ -278,11 +279,14 @@ class forceSim:
         """
 
         self.rivQw = numpy.zeros(len(self.tXY))
+        print("self.rivQw")
+        print(self.rivQw)
         if self.rockNb == 0:
             self.rivQs = numpy.zeros((len(self.tXY),1))
         else:
             self.rivQs = numpy.zeros((len(self.tXY),self.rockNb))
 
+        print("Placeholder. rivQws, riverRck and rivQw should not be activated.")
         if self.rivNb > 0:
             active = numpy.where(numpy.logical_and(self.rivTime[:,0] <= time, self.rivTime[:,1] > time))[0]
             rivNb = len(active)
@@ -295,6 +299,11 @@ class forceSim:
                     rivRock = self.riverRck[active[r]]
                     self.rivQw[ids[r]] += riv_qw
                     self.rivQs[ids[r],rivRock] += riv_qs
+
+        print("Insert function here which does as above but contains logic for waves.")
+
+        if self.wavesOn:
+            print('waveSed is on - this logic works')
 
     def update_force_TIN(self, tXY):
         """

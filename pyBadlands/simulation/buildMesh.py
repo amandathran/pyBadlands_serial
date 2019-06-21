@@ -46,7 +46,10 @@ def construct_mesh(input, filename, verbose=False):
                 input.tectTime, recGrid.regX, recGrid.regY, input.riverPos,
                 input.riverTime, input.riverQws, input.riverRck, input.riverNb,
                 input.rockNb, input.tDisplay, input.carbValSp1, input.carbValSp2,
-                input.carbTime)
+                input.carbTime, input.waveSed)
+
+    print("force.rivQw")
+    print(force.rivQw)
 
     if input.disp3d:
         force.time3d = input.time3d

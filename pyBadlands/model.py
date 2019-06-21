@@ -36,6 +36,7 @@ class Model(object):
         self.pelaval = None
         self.applyDisp = False
         self.simStarted = False
+        self.tstepFlux = 0.
 
     def load_xml(self, filename, verbose=False):
         """
@@ -82,10 +83,18 @@ class Model(object):
         self.inGIDs, self.totPts, self.elevation, self.cumdiff, self.cumhill, self.cumfail, self.cumflex, self.strata, self.mapero, \
         self.tinFlex, self.flex, self.wave, self.straTIN, self.carbTIN = buildMesh.construct_mesh(self.input, filename, verbose)
 
+        print("min(self.FVmesh.control_volumes)")
+        print(min(self.FVmesh.control_volumes))
+        print("max(self.FVmesh.control_volumes)")
+        print(max(self.FVmesh.control_volumes))
+
         if self.input.waveSed:
             self.wavediff = np.zeros((self.totPts))
+            print("placeholder - remove waveQs twice")
+            self.waveQs = np.zeros((self.totPts))
         else:
             self.wavediff = None
+            self.waveQs = None
 
         # Define hillslope parameters
         self.rain = np.zeros(self.totPts, dtype=float)
@@ -217,6 +226,7 @@ class Model(object):
         verbose : bool
             If True, output additional debug information.
         """
+
         if profile:
             pid = os.getpid()
             pr = cProfile.Profile()
@@ -367,9 +377,13 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                self.elevation += waveED
-                self.cumdiff  += waveED
-                self.wavediff  += waveED
+                print("waveED.shape")
+                print(waveED.shape)
+                print("waveED originally added to cumulative ero/dep here")
+                self.waveQs = np.where(waveED>0, waveED, 0)
+                #self.elevation += waveED
+                #self.cumdiff  += waveED
+                #self.wavediff  += waveED
                 print("   - Compute wave-induced sediment transport %0.02f seconds" % (time.clock() - wavetime))
                 # Update carbonate active layer
                 if nactlay is not None:
@@ -433,6 +447,10 @@ class Model(object):
                 print("   - Compute carbonate growth %0.02f seconds" % (time.clock() - carbtime))
 
             # Compute stream network
+            print("***calling streamflow")
+            print("tNow = %s" % self.tNow)
+            print("***self.tstepFlux***")
+            print(self.tstepFlux)
             self.fillH, self.elevation = buildFlux.streamflow(self.input, self.FVmesh, self.recGrid, self.force, self.hillslope, \
                                               self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, verbose)
 
@@ -443,7 +461,7 @@ class Model(object):
                 checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow,
                                             self.FVmesh, self.tMesh, self.force, self.flow, self.rain,
                                             self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff,
-                                            self.outputStep, self.prop, self.mapero, self.cumflex)
+                                            self.outputStep, self.prop, self.mapero, self.cumflex, self.waveQs)
 
                 if self.straTIN is not None and self.outputStep % self.input.tmesh==0:
                     meshtime = time.clock()
@@ -479,7 +497,7 @@ class Model(object):
                         tEnd, self.force.next_wave, self.force.next_disp, self.force.next_rain,
                         self.next_carbStep])
 
-            self.tNow, self.elevation, self.cumdiff, self.cumhill, self.cumfail = buildFlux.sediment_flux(self.input, self.recGrid, self.hillslope, \
+            self.tNow, self.elevation, self.cumdiff, self.cumhill, self.cumfail, self.tstepFlux = buildFlux.sediment_flux(self.input, self.recGrid, self.hillslope, \
                               self.FVmesh, self.tMesh, self.flow, self.force, self.rain, self.lGIDs, self.applyDisp, self.straTIN, self.mapero,  \
                               self.cumdiff, self.cumhill, self.cumfail, self.fillH, self.disp, self.inGIDs, self.elevation, self.tNow, tStop, verbose)
 
@@ -508,7 +526,7 @@ class Model(object):
             checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow, \
                                 self.FVmesh, self.tMesh, self.force, self.flow, self.rain, \
                                 self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff, \
-                                self.outputStep, self.prop, self.mapero, self.cumflex)
+                                self.outputStep, self.prop, self.mapero, self.cumflex, self.waveQs)
             self.force.next_display += self.input.tDisplay
             self.outputStep += 1
             if self.straTIN is not None:

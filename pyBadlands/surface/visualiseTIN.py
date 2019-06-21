@@ -79,7 +79,7 @@ def output_cellsIDs(lGIDs, inIDs, visXlim, visYlim, coords, cells):
 
 def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff, cumhill, cumfail,
                cells, rainOn, eroOn, erodibility, area, waveOn, waveH, waveS, wavediff,
-               rockOn, prop):
+               rockOn, prop, waveQs):
     """
     This function writes for each processor the HDF5 file containing surface information.
 
@@ -181,6 +181,9 @@ def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff
             f["waveS"][:,0] = waveS
             f.create_dataset('cumwave',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["cumwave"][:,0] = wavediff
+            print("placeholder - delete temporary mobile layer")
+            f.create_dataset('waveMobile',shape=(len(discharge), 1), dtype='float32', compression='gzip')
+            f["waveMobile"][:,0] = waveQs
 
         if rockOn:
             nbSed = prop.shape[1]
@@ -197,7 +200,7 @@ def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff
 
 def write_hdf5_flexure(folder, h5file, step, coords, elevation, rain, discharge, cumdiff, cumhill, cumfail,
                        cumflex, cells, rainOn, eroOn, erodibility, area, waveOn, waveH,  waveS, wavediff,
-                       rockOn, prop):
+                       rockOn, prop, waveQs):
     """
     This function writes for each processor the HDF5 file containing surface information.
 
@@ -302,6 +305,9 @@ def write_hdf5_flexure(folder, h5file, step, coords, elevation, rain, discharge,
             f["waveS"][:,0] = waveS
             f.create_dataset('cumwave',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["cumwave"][:,0] = wavediff
+            print("placeholder - delete temporary mobile layer")
+            f.create_dataset('waveMobile',shape=(len(discharge), 1), dtype='float32', compression='gzip')
+            f["waveMobile"][:,0] = waveQs
 
         if rockOn:
             nbSed = prop.shape[1]
@@ -476,6 +482,12 @@ def write_xmf(folder, xmffile, xdmffile, step, t, elems, nodes, h5file, sealevel
             f.write('         <Attribute Type="Scalar" Center="Node" Name="EroDep wave">\n')
             f.write('          <DataItem Format="HDF" NumberType="Float" Precision="4" ')
             f.write('Dimensions="%d 1">%s:/cumwave</DataItem>\n'%(nodes[p],pfile))
+            f.write('         </Attribute>\n')
+
+            print("placeholder - delete temporary mobile layer")
+            f.write('         <Attribute Type="Scalar" Center="Node" Name="waveMobile">\n')
+            f.write('          <DataItem Format="HDF" NumberType="Float" Precision="4" ')
+            f.write('Dimensions="%d 1">%s:/waveMobile</DataItem>\n'%(nodes[p],pfile))
             f.write('         </Attribute>\n')
 
         if rockOn:
