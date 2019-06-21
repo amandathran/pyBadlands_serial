@@ -162,6 +162,9 @@ class Model(object):
             self.inGIDs, self.totPts = buildMesh.reconstruct_mesh(self.recGrid,
                                                                   self.input, verbose)
 
+        print("rebuilt fvmesh: ")
+        print(self.FVmesh.control_volumes)
+
         # Update edges elevation
         tree1 = cKDTree(self.FVmesh.node_coords[self.fixIDs:,:2])
         tmpelev = self.elevation[self.fixIDs:]
@@ -377,10 +380,13 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                print("waveED.shape")
-                print(waveED.shape)
                 print("waveED originally added to cumulative ero/dep here")
-                self.waveQs = np.where(waveED>0, waveED, 0)
+
+                # Extract wave-mobilized sediments to trigger hyperpycnal flows
+                # Keep only positive elevations
+                waveDep = np.where(waveED>0, waveED, 0)
+                self.waveQs = np.multiply(waveDep,self.FVmesh.control_volumes)/self.input.tWave
+
                 #self.elevation += waveED
                 #self.cumdiff  += waveED
                 #self.wavediff  += waveED
