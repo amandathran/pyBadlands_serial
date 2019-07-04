@@ -30,9 +30,6 @@ class Model(object):
         self.prop = None
         self.carbval = None
         self.carbval2 = None
-        self.carbMaxGrowthSp1 = None
-        self.carbMaxGrowthSp2 = None
-        self.next_carbStep = None
         self.pelaval = None
         self.applyDisp = False
         self.simStarted = False
@@ -133,13 +130,12 @@ class Model(object):
                 self.force.next_wave = self.input.tEnd + 1.e5
 
         if self.input.carb:
-
-            self.next_carbStep = self.input.tStart + self.input.tCarb
+            self.force.next_carb = self.input.tStart + self.input.tCarb
             self.oldsed = np.zeros(len(self.elevation))
             if self.carbTIN is not None:
                 self.prop = np.zeros((self.totPts,self.carbTIN.nbSed))
         else:
-            self.next_carbStep = self.input.tEnd + 1.e5
+            self.force.next_carb = self.input.tEnd + 1.e5
             self.prop = np.zeros((self.totPts,1))
 
     def rebuild_mesh(self, verbose=False):
@@ -232,8 +228,6 @@ class Model(object):
         if not self.simStarted:
             self.force.next_rain = self.force.T_rain[0, 0]
             self.force.next_disp = self.force.T_disp[0, 0]
-            self.force.next_carb = self.force.T_carb[0, 0]
-
             self.force.next_display = self.input.tStart
             if self.input.laytime>0:
                 self.force.next_layer = self.input.tStart + self.input.laytime
@@ -378,22 +372,16 @@ class Model(object):
                 self.force.next_wave += self.input.tWave
 
             # Compute carbonate evolution
-            if self.tNow >= self.next_carbStep:
+            if self.tNow >= self.force.next_carb:
                 carbtime = time.clock()
                 depth = self.elevation-self.force.sealevel
                 if self.carbTIN is not None:
                     # Update erosion/deposition due to river and diffusion on carbTIN
                     self.carbTIN.update_layers(self.cumdiff-self.oldsed,self.elevation)
-
                 # Compute reef growth
                 if self.input.carbonate:
-
-                    # Load carbonate growth rates for species 1 and 2 during a given growth event
-                    if self.force.next_carb <= self.tNow and self.force.next_carb < self.input.tEnd:
-                        self.carbMaxGrowthSp1, self.carbMaxGrowthSp2 = self.force.get_carbGrowth(self.tNow, self.inIDs)
                     self.carbval, self.carbval2 = self.carb.computeCarbonate(self.force.meanH, self.cumdiff-self.oldsed,
-                                                            depth, self.carbMaxGrowthSp1, self.carbMaxGrowthSp2, self.input.tCarb)
-
+                                                            depth, self.input.tCarb)
                     if self.carbval2 is not None:
                         self.cumdiff +=  self.carbval + self.carbval2
                         self.elevation += self.carbval + self.carbval2
@@ -428,8 +416,7 @@ class Model(object):
 
                 # Update current cumulative erosion deposition
                 self.oldsed = np.copy(self.cumdiff)
-                self.next_carbStep += self.input.tCarb
-
+                self.force.next_carb += self.input.tCarb
                 print("   - Compute carbonate growth %0.02f seconds" % (time.clock() - carbtime))
 
             # Compute stream network
@@ -477,7 +464,7 @@ class Model(object):
             # Get the maximum time before updating one of the above processes / components
             tStop = min([self.force.next_display, self.force.next_layer, self.force.next_flexure,
                         tEnd, self.force.next_wave, self.force.next_disp, self.force.next_rain,
-                        self.next_carbStep])
+                        self.force.next_carb])
 
             self.tNow, self.elevation, self.cumdiff, self.cumhill, self.cumfail = buildFlux.sediment_flux(self.input, self.recGrid, self.hillslope, \
                               self.FVmesh, self.tMesh, self.flow, self.force, self.rain, self.lGIDs, self.applyDisp, self.straTIN, self.mapero,  \

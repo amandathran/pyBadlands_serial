@@ -25,7 +25,6 @@ def construct_mesh(input, filename, verbose=False):
         - define the partitioning when parallelisation is enable.
     """
 
-
     cumflex = None
     flex = None
     wave = None
@@ -45,8 +44,7 @@ def construct_mesh(input, filename, verbose=False):
                 input.cw, input.hw, input.ortime, input.tectFile,
                 input.tectTime, recGrid.regX, recGrid.regY, input.riverPos,
                 input.riverTime, input.riverQws, input.riverRck, input.riverNb,
-                input.rockNb, input.tDisplay, input.carbValSp1, input.carbValSp2,
-                input.carbTime)
+                input.rockNb, input.tDisplay)
 
     if input.disp3d:
         force.time3d = input.time3d
@@ -152,7 +150,6 @@ def construct_mesh(input, filename, verbose=False):
             nbSed = 3
         else:
             nbSed = 2
-
         if input.restart:
             carbTIN = carbMesh.carbMesh(layNb, input.initlayers, FVmesh.node_coords[:, :2], bPts,
                             ePts, input.layersData, input.outDir, input.strath5file, input.baseMap, nbSed,
@@ -417,3 +414,5 @@ def _get_reference_elevation(input, recGrid, elevation):
     else:
         ref_elev = 0.
     return ref_elev
+
+
