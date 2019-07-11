@@ -656,7 +656,7 @@ class flowNetwork:
             if actlay is None:
                 actlay = numpy.zeros((len(elev),1))
 
-            cdepo, cero, sedload, slope, flowdensity = FLOWalgo.flowcompute.streampower(self.critdens, self.localstack,self.receivers,self.pitID, \
+            cdepo, cero, sedload, slopeTIN, flowdensity = FLOWalgo.flowcompute.streampower(self.critdens, self.localstack,self.receivers,self.pitID, \
                      self.pitVolume,self.pitDrain,self.xycoords,Acell,self.maxh,self.maxdep,self.discharge,fillH, \
                      elev,rivqs,eroCoeff,actlay,perc_dep,slp_cr,sealevel,sealevel+self.deepb,newdt,self.borders)
 
@@ -694,7 +694,7 @@ class flowNetwork:
                 time1 = time.clock()
 
             if newdt < dt:
-                cdepo, cero, sedload, flowdensity = FLOWalgo.flowcompute.streampower(self.critdens, self.localstack,self.receivers,self.pitID, \
+                cdepo, cero, sedload, slopeTIN, flowdensity = FLOWalgo.flowcompute.streampower(self.critdens, self.localstack,self.receivers,self.pitID, \
                         self.pitVolume,self.pitDrain,self.xycoords,Acell,self.maxh,self.maxdep,self.discharge,fillH, \
                         elev,rivqs,eroCoeff,actlay,perc_dep,slp_cr,sealevel,sealevel+self.deepb,newdt,self.borders)
                 volChange = cdepo+cero
@@ -790,7 +790,7 @@ class flowNetwork:
             if verbose:
                 print("   - Total sediment flux time ", time.clock() - time0)
 
-        return newdt,sedflux,erosion,deposition
+        return newdt,sedflux,erosion,deposition,slopeTIN
 
     def gaussian_diffusion(self, diff, dsmooth):
         """
