@@ -308,12 +308,6 @@ class forceSim:
         # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
         self.tStart = tStart
 
-        print("self.waveFlux.shape")
-        print(self.waveFlux.shape)
-
-        print("self.rivQs.shape")
-        print(self.rivQs.shape)
-
         if self.wavesOn:
             if time != self.tStart and time+tWave == self.next_wave:
                 # Don't clear waveFlux - filled in model.py
@@ -324,13 +318,6 @@ class forceSim:
 
             tmp = self.waveFlux.reshape(len(self.waveFlux),1)
             self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
-
-            print("self.rivQs.shape")
-            print(self.rivQs.shape)
-            print("adding max wave flux of %s to rivQs" % max(self.waveFlux))
-            print("max(self.rivQs)")
-            print(max(self.rivQs))
-
 
 
     def update_force_TIN(self, tXY):
@@ -381,8 +368,6 @@ class forceSim:
 
     def get_Rain(self, time, elev, inIDs):
 
-        print("calling get_Rain")
-
         """
         Get rain value for a given period and perform interpolation from regular grid to unstructured TIN one.
 
@@ -430,9 +415,6 @@ class forceSim:
             rectRain = numpy.reshape(rainMap.values,(len(self.regX), len(self.regY)),order='F')
             tinRain = interpolate.interpn( (self.regX, self.regY), rectRain, self.tXY[inIDs,:], method='linear')
             self.next_rain = self.T_rain[event,1]
-
-        print("tinRain.shape")
-        print(tinRain.shape)
 
         return tinRain
 

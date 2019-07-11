@@ -126,8 +126,6 @@ def construct_mesh(input, filename, verbose=False):
         ref_elev = _get_reference_elevation(input,recGrid,elevation)
         wave = _init_wavesed(input,ref_elev, recGrid, force, verbose)
         wave.build_tree(FVmesh.node_coords[:,:2])
-        print("wave.wxyTIN.shape")
-        print(wave.wxyTIN.shape)
 
     # Stratigraphic TIN initialisation
     if input.rockNb > 0:

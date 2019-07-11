@@ -376,12 +376,13 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                print("waveED originally added to cumulative ero/dep here - make sure you account for erosion")
 
                 # Extract wave-mobilized sediments to trigger hyperpycnal flows
                 # All the nodes where the waves transfer sediments in will be
                 # incorporated/deposited within the flow network
                 waveDep = np.where(waveED>0, waveED, 0)
+                print("waveDep.shape")
+                print(waveDep.shape)
                 self.force.waveFlux = np.multiply(waveDep,self.FVmesh.control_volumes)/self.input.tWave
 
                 # Account for wave erosion in final elevation change

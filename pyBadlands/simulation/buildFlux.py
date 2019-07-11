@@ -24,9 +24,6 @@ def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
     Compute flow network.
     """
 
-    print("max(force.waveFlux)")
-    print(max(force.waveFlux))
-
     # Update sea-level
     walltime = time.clock()
     ref_elev = _get_reference_elevation(input, recGrid, elevation)
@@ -34,11 +31,7 @@ def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
     fillH = None
 
     # Update river input
-    print("calling getRivers() - tNow = %s" % tNow)
-
     force.getRivers(tNow, input.tWave, input.tStart)
-    print("max(force.rivQs)")
-    print(max(force.rivQs))
     riverrain = rain+force.rivQw
 
     # Build an initial depression-less surface at start time if required
