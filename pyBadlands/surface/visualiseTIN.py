@@ -79,7 +79,7 @@ def output_cellsIDs(lGIDs, inIDs, visXlim, visYlim, coords, cells):
 
 def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff, cumhill, cumfail,
                cells, rainOn, eroOn, erodibility, area, waveOn, waveH, waveS, wavediff,
-               rockOn, prop):
+               rockOn, prop, slopeTIN):
     """
     This function writes for each processor the HDF5 file containing surface information.
 
@@ -174,6 +174,9 @@ def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff
         f.create_dataset('area',shape=(len(discharge), 1), dtype='float32', compression='gzip')
         f["area"][:,0] = area
 
+        f.create_dataset('slopeTIN',shape=(len(discharge), 1), dtype='float32', compression='gzip')
+        f["slopeTIN"][:,0] = slopeTIN
+
         if waveOn:
             f.create_dataset('waveH',shape=(len(discharge), 1), dtype='float32', compression='gzip')
             f["waveH"][:,0] = waveH
@@ -197,7 +200,7 @@ def write_hdf5(folder, h5file, step, coords, elevation, rain, discharge, cumdiff
 
 def write_hdf5_flexure(folder, h5file, step, coords, elevation, rain, discharge, cumdiff, cumhill, cumfail,
                        cumflex, cells, rainOn, eroOn, erodibility, area, waveOn, waveH,  waveS, wavediff,
-                       rockOn, prop):
+                       rockOn, prop, slopeTIN):
     """
     This function writes for each processor the HDF5 file containing surface information.
 
@@ -294,6 +297,9 @@ def write_hdf5_flexure(folder, h5file, step, coords, elevation, rain, discharge,
 
         f.create_dataset('area',shape=(len(discharge), 1), dtype='float32', compression='gzip')
         f["area"][:,0] = area
+
+        f.create_dataset('slopeTIN',shape=(len(discharge), 1), dtype='float32', compression='gzip')
+        f["slopeTIN"][:,0] = slopeTIN
 
         if waveOn:
             f.create_dataset('waveH',shape=(len(discharge), 1), dtype='float32', compression='gzip')
@@ -442,6 +448,11 @@ def write_xmf(folder, xmffile, xdmffile, step, t, elems, nodes, h5file, sealevel
         f.write('         <Attribute Type="Scalar" Center="Node" Name="EroDep failure">\n')
         f.write('          <DataItem Format="HDF" NumberType="Float" Precision="4" ')
         f.write('Dimensions="%d 1">%s:/cumfail</DataItem>\n'%(nodes[p],pfile))
+        f.write('         </Attribute>\n')
+
+        f.write('         <Attribute Type="Scalar" Center="Node" Name="Slope">\n')
+        f.write('          <DataItem Format="HDF" NumberType="Float" Precision="4" ')
+        f.write('Dimensions="%d 1">%s:/slopeTIN</DataItem>\n'%(nodes[p],pfile))
         f.write('         </Attribute>\n')
 
         if flexOn:
