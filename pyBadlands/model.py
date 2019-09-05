@@ -78,6 +78,7 @@ class Model(object):
 
         # Initialize TIN mobilized wave sediments going to fluvial flowNetwork
         self.waveMobile = np.zeros(self.totPts, dtype=float)
+        self.newWaveED = np.zeros(self.totPts, dtype=float)
 
     def build_mesh(self, filename, verbose):
         # Construct Badlands mesh and grid to run simulation
@@ -373,16 +374,17 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
 
-                # Wave-remobilized sediments sent to river network if over steep slope
+                # Wave-remobilized sediments sent to stream network if mobilized over steep slopes
                 slopeVal = 0.01
                 slopeBool = (self.slopeTIN > slopeVal).astype(int)
                 waveDep = waveED.clip(min=0) # keep positive values (deposition)
                 self.waveMobile = np.multiply(slopeBool,waveDep)
+                self.newWaveED = np.subtract(waveED, self.waveMobile)
 
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                self.elevation += waveED
-                self.cumdiff  += waveED
-                self.wavediff  += waveED
+                self.elevation += self.newWaveED
+                self.cumdiff  += self.newWaveED
+                self.wavediff  += self.newWaveED
                 print("   - Compute wave-induced sediment transport %0.02f seconds" % (time.clock() - wavetime))
                 # Update carbonate active layer
                 if nactlay is not None:
@@ -458,7 +460,7 @@ class Model(object):
                 checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow,
                                             self.FVmesh, self.tMesh, self.force, self.flow, self.rain,
                                             self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff,
-                                            self.outputStep, self.prop, self.waveMobile, self.mapero, self.cumflex)
+                                            self.outputStep, self.prop, self.newWaveED, self.mapero, self.cumflex)
 
                 if self.straTIN is not None and self.outputStep % self.input.tmesh==0:
                     meshtime = time.clock()
@@ -524,7 +526,7 @@ class Model(object):
             checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow, \
                                 self.FVmesh, self.tMesh, self.force, self.flow, self.rain, \
                                 self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff, \
-                                self.outputStep, self.prop, self.waveMobile, self.mapero, self.cumflex)
+                                self.outputStep, self.prop, self.newWaveED, self.mapero, self.cumflex)
             self.force.next_display += self.input.tDisplay
             self.outputStep += 1
             if self.straTIN is not None:
