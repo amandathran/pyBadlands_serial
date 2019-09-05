@@ -258,7 +258,7 @@ class forceSim:
 
         return
 
-    def getRivers(self, time):
+    def getRivers(self, time, waveMobile):
         """
         Finds for a given time the active rivers and allocates corresponding points with
         water and sediment discharge values.
@@ -282,6 +282,9 @@ class forceSim:
             self.rivQs = numpy.zeros((len(self.tXY),1))
         else:
             self.rivQs = numpy.zeros((len(self.tXY),self.rockNb))
+
+        print("waveMobile.shape in forceSim.py")
+        print(waveMobile.shape)
 
         if self.rivNb > 0:
             active = numpy.where(numpy.logical_and(self.rivTime[:,0] <= time, self.rivTime[:,1] > time))[0]

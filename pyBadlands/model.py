@@ -449,7 +449,7 @@ class Model(object):
 
             # Compute stream network
             self.fillH, self.elevation = buildFlux.streamflow(self.input, self.FVmesh, self.recGrid, self.force, self.hillslope, \
-                                              self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, verbose)
+                                              self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, self.waveMobile, verbose)
 
             # Create checkpoint files and write HDF5 output
             if self.tNow >= self.force.next_display:
