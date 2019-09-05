@@ -258,6 +258,11 @@ class forceSim:
 
         return
 
+    def initWaveFlux(self, inIDs):
+        self.waveFlux = numpy.zeros((len(self.tXY)), dtype=float)
+
+        return
+
     def getRivers(self, time, waveMobile):
         """
         Finds for a given time the active rivers and allocates corresponding points with

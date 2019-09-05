@@ -274,6 +274,11 @@ class Model(object):
                 self.rain = np.zeros(self.totPts, dtype=float)
                 self.rain[self.inIDs] = self.force.get_Rain(self.tNow, self.elevation, self.inIDs)
 
+
+            # Initialize waveFlux at tStart
+            if self.tNow == self.input.tStart:
+                self.force.initWaveFlux(self.inIDs)
+
             # Load tectonic grid
             if not self.input.disp3d:
                 # Vertical displacements
@@ -380,6 +385,7 @@ class Model(object):
                 waveDep = waveED.clip(min=0) # keep positive values (deposition)
                 self.waveMobile = np.multiply(slopeBool,waveDep)
                 self.newWaveED = np.subtract(waveED, self.waveMobile)
+                self.force.waveFlux = np.multiply(self.newWaveED,self.FVmesh.control_volumes)/self.input.tWave
 
                 # Update elevation / cumulative changes based on wave-induced sediment transport
                 self.elevation += self.newWaveED
