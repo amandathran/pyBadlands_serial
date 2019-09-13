@@ -74,6 +74,10 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
 
     # Write HDF5 files
     if input.waveSed and tNow > input.tStart:
+        print("tNow")
+        print(tNow)
+        print("tStart")
+        print(input.tStart)
         waveOn = True
         meanH = force.meanH[lGIDs]
         meanS = force.meanS[lGIDs]
@@ -84,10 +88,6 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
         meanS = None
         wdiff = None
 
-    #print("elevation.shape")
-    #print(elevation.shape)
-    #print("slopeTIN.shape")
-    print(slopeTIN)
 
     if input.flexure:
         visualiseTIN.write_hdf5_flexure(input.outDir, input.th5file, step, tMesh.node_coords[:,:2],

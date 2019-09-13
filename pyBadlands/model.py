@@ -379,6 +379,9 @@ class Model(object):
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
 
+                print("Maximum wave dep: ")
+                print(max(waveED))
+
                 # Wave-remobilized sediments sent to stream network if mobilized over steep slopes
                 slopeVal = 0.01
                 slopeBool = (self.slopeTIN > slopeVal).astype(int)
@@ -455,7 +458,7 @@ class Model(object):
 
             # Compute stream network
             self.fillH, self.elevation = buildFlux.streamflow(self.input, self.FVmesh, self.recGrid, self.force, self.hillslope, \
-                                              self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, self.waveMobile, verbose)
+                                              self.flow, self.elevation, self.lGIDs, self.rain, self.tNow, verbose)
 
             # Create checkpoint files and write HDF5 output
             if self.tNow >= self.force.next_display:

@@ -263,7 +263,7 @@ class forceSim:
 
         return
 
-    def getRivers(self, time, waveMobile):
+    def getRivers(self, time):
         """
         Finds for a given time the active rivers and allocates corresponding points with
         water and sediment discharge values.
@@ -288,9 +288,6 @@ class forceSim:
         else:
             self.rivQs = numpy.zeros((len(self.tXY),self.rockNb))
 
-        print("waveMobile.shape in forceSim.py")
-        print(waveMobile.shape)
-
         if self.rivNb > 0:
             active = numpy.where(numpy.logical_and(self.rivTime[:,0] <= time, self.rivTime[:,1] > time))[0]
             rivNb = len(active)
@@ -303,6 +300,10 @@ class forceSim:
                     rivRock = self.riverRck[active[r]]
                     self.rivQw[ids[r]] += riv_qw
                     self.rivQs[ids[r],rivRock] += riv_qs
+
+        # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
+        print("feeding wave seds to rivQs")
+        self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
 
     def update_force_TIN(self, tXY):
         """

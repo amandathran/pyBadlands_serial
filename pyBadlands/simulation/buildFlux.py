@@ -19,7 +19,7 @@ from buildMesh import _get_reference_elevation
 from pyBadlands import (elevationTIN)
 
 def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
-                 lGIDs, rain, tNow, waveMobile, verbose=False):
+                 lGIDs, rain, tNow, verbose=False):
     """
     Compute flow network.
     """
@@ -31,7 +31,7 @@ def streamflow(input, FVmesh, recGrid, force, hillslope, flow, elevation, \
     fillH = None
 
     # Update river input
-    force.getRivers(tNow, waveMobile)
+    force.getRivers(tNow)
     riverrain = rain+force.rivQw
 
     # Build an initial depression-less surface at start time if required
