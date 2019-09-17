@@ -133,7 +133,7 @@ contains
 
   end subroutine allfillPD
 
-  subroutine marine_distribution(elevation, seavol, sealevel, border, depIDs, diffsed, pydnodes, pyIDs, pyRockNb)
+  subroutine marine_distribution(elevation, seavol, sealevel, border, depIDs, pySlp, diffsed, pydnodes, pyIDs, pyRockNb)
 
     integer :: pydnodes, pyIDs, pyRockNb
     integer,dimension(pyIDs),intent(in) :: depIDs
@@ -141,6 +141,7 @@ contains
     real(kind=8),intent(in) :: sealevel
     real(kind=8),dimension(pydnodes,pyRockNb),intent(in) :: seavol
     real(kind=8),dimension(pydnodes),intent(in) :: elevation
+    real(kind=8),dimension(pydnodes),intent(in) :: pySlp
 
     real(kind=8),dimension(pydnodes,pyRockNb),intent(out) :: diffsed
 
@@ -151,6 +152,8 @@ contains
 
     dnodes = pydnodes
     elev = elevation
+
+    print *, 'Calling subroutine marine_distribution'
 
     do s = 1, pyRockNb
       newelev = elev
@@ -173,6 +176,7 @@ contains
               enddo loop0
               if(maxz>sealevel) maxz = sealevel
               if(maxz<elev(id)) maxz = elev(id)
+              diffprop = (0.9_8)/(1.0_8+exp(1500._8*(pySlp(id)-0.005_8)))
               vol = max(0.,diffprop*(maxz-elev(id))*area(id))
 
               if(it>max_it_cyc)then

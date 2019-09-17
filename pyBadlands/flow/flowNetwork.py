@@ -772,7 +772,7 @@ class flowNetwork:
                     seaIDs = seaid[:nsea]
                     seavol = numpy.zeros(depo.shape)
                     seavol[seaIDs,:] = depo[seaIDs,:]
-                    seadep = PDalgo.pdstack.marine_distribution(elev, seavol, sealevel, self.borders, seaIDs)
+                    seadep = PDalgo.pdstack.marine_distribution(elev, seavol, sealevel, self.borders, seaIDs, slopeTIN)
                     deposition += seadep
                     depo[seaIDs,:] = 0.
                     if verbose:

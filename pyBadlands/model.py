@@ -388,7 +388,7 @@ class Model(object):
                 waveDep = waveED.clip(min=0) # keep positive values (deposition)
                 self.waveMobile = np.multiply(slopeBool,waveDep)
                 self.newWaveED = np.subtract(waveED, self.waveMobile)
-                self.force.waveFlux = np.multiply(self.newWaveED,self.FVmesh.control_volumes)/self.input.tWave
+                self.force.waveFlux = np.multiply(self.waveMobile,self.FVmesh.control_volumes)/self.input.tWave
 
                 # Update elevation / cumulative changes based on wave-induced sediment transport
                 self.elevation += self.newWaveED
@@ -469,7 +469,7 @@ class Model(object):
                 checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow,
                                             self.FVmesh, self.tMesh, self.force, self.flow, self.rain,
                                             self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff,
-                                            self.outputStep, self.prop, self.newWaveED, self.mapero, self.cumflex)
+                                            self.outputStep, self.prop, self.slopeTIN, self.mapero, self.cumflex)
 
                 if self.straTIN is not None and self.outputStep % self.input.tmesh==0:
                     meshtime = time.clock()
@@ -535,7 +535,7 @@ class Model(object):
             checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow, \
                                 self.FVmesh, self.tMesh, self.force, self.flow, self.rain, \
                                 self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff, \
-                                self.outputStep, self.prop, self.newWaveED, self.mapero, self.cumflex)
+                                self.outputStep, self.prop, self.slopeTIN, self.mapero, self.cumflex)
             self.force.next_display += self.input.tDisplay
             self.outputStep += 1
             if self.straTIN is not None:

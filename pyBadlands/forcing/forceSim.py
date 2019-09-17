@@ -284,6 +284,7 @@ class forceSim:
 
         self.rivQw = numpy.zeros(len(self.tXY))
         if self.rockNb == 0:
+            print("resetting rivQs")
             self.rivQs = numpy.zeros((len(self.tXY),1))
         else:
             self.rivQs = numpy.zeros((len(self.tXY),self.rockNb))
@@ -303,7 +304,7 @@ class forceSim:
 
         # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
         print("feeding wave seds to rivQs")
-        self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
+        self.rivQs = numpy.zeros((len(self.tXY),1))
 
     def update_force_TIN(self, tXY):
         """
