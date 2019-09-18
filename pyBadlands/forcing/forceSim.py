@@ -304,7 +304,7 @@ class forceSim:
 
         # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
         print("feeding wave seds to rivQs")
-        self.rivQs = numpy.zeros((len(self.tXY),1))
+        self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
 
     def update_force_TIN(self, tXY):
         """
