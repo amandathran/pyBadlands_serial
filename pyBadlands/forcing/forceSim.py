@@ -258,6 +258,11 @@ class forceSim:
 
         return
 
+    def initWaveFlux(self, inIDs):
+        self.waveFlux = numpy.zeros((len(self.tXY)), dtype=float)
+
+        return
+
     def getRivers(self, time):
         """
         Finds for a given time the active rivers and allocates corresponding points with
@@ -279,6 +284,7 @@ class forceSim:
 
         self.rivQw = numpy.zeros(len(self.tXY))
         if self.rockNb == 0:
+            print("resetting rivQs")
             self.rivQs = numpy.zeros((len(self.tXY),1))
         else:
             self.rivQs = numpy.zeros((len(self.tXY),self.rockNb))
@@ -295,6 +301,10 @@ class forceSim:
                     rivRock = self.riverRck[active[r]]
                     self.rivQw[ids[r]] += riv_qw
                     self.rivQs[ids[r],rivRock] += riv_qs
+
+        # Pass sediments mobilized by waves to rivQs - to become incorporated into flow network
+        print("feeding wave seds to rivQs")
+        self.rivQs += self.waveFlux.reshape(len(self.waveFlux),1)
 
     def update_force_TIN(self, tXY):
         """

@@ -18,7 +18,7 @@ from pyBadlands import (visualiseFlow, visualiseTIN, eroMesh)
 def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
                       tMesh, force, flow, rain, elevation, fillH, \
                       cumdiff, cumhill, cumfail, wavediff, step, prop, \
-                      mapero=None, cumflex=None):
+                      slopeTIN, mapero=None, cumflex=None):
     """
     Create the checkpoint files (used for HDF5 output).
     """
@@ -74,6 +74,10 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
 
     # Write HDF5 files
     if input.waveSed and tNow > input.tStart:
+        print("tNow")
+        print(tNow)
+        print("tStart")
+        print(input.tStart)
         waveOn = True
         meanH = force.meanH[lGIDs]
         meanS = force.meanS[lGIDs]
@@ -84,19 +88,20 @@ def write_checkpoints(input, recGrid, lGIDs, inIDs, tNow, FVmesh, \
         meanS = None
         wdiff = None
 
+
     if input.flexure:
         visualiseTIN.write_hdf5_flexure(input.outDir, input.th5file, step, tMesh.node_coords[:,:2],
                                     elevation[lGIDs], rain[lGIDs], visdis[lGIDs], cumdiff[lGIDs],
                                     cumhill[lGIDs], cumfail[lGIDs], cumflex[lGIDs], FVmesh.outCells, input.oroRain,
                                     eroOn, flow.erodibility[lGIDs], FVmesh.control_volumes[lGIDs],
-                                    waveOn, meanH, meanS, wdiff, rockOn, prop[lGIDs,:])
+                                    waveOn, meanH, meanS, wdiff, rockOn, prop[lGIDs,:], slopeTIN[lGIDs])
     else:
         visualiseTIN.write_hdf5(input.outDir, input.th5file, step, tMesh.node_coords[:,:2],
                                 elevation[lGIDs], rain[lGIDs], visdis[lGIDs], cumdiff[lGIDs],
                                 cumhill[lGIDs], cumfail[lGIDs], FVmesh.outCells, input.oroRain, eroOn,
                                 flow.erodibility[lGIDs], FVmesh.control_volumes[lGIDs],
                                 waveOn, meanH, meanS, wdiff, rockOn,
-                                prop[lGIDs,:])
+                                prop[lGIDs,:], slopeTIN[lGIDs])
 
     if flow.sedload is not None:
             if flow.flowdensity is not None:

@@ -76,6 +76,10 @@ class Model(object):
         if self.input.pelagic:
             self.pelagic = pelagicGrowth.pelagicGrowth(self.input)
 
+        # Initialize TIN mobilized wave sediments going to fluvial flowNetwork
+        self.waveMobile = np.zeros(self.totPts, dtype=float)
+        self.newWaveED = np.zeros(self.totPts, dtype=float)
+
     def build_mesh(self, filename, verbose):
         # Construct Badlands mesh and grid to run simulation
         self.recGrid, self.FVmesh, self.force, self.tMesh, self.lGIDs, self.fixIDs, self.inIDs, parentIDs, \
@@ -86,6 +90,9 @@ class Model(object):
             self.wavediff = np.zeros((self.totPts))
         else:
             self.wavediff = None
+
+        # Initialize TIN slope (gradient)
+        self.slopeTIN = np.zeros(self.totPts, dtype=float)
 
         # Define hillslope parameters
         self.rain = np.zeros(self.totPts, dtype=float)
@@ -267,6 +274,11 @@ class Model(object):
                 self.rain = np.zeros(self.totPts, dtype=float)
                 self.rain[self.inIDs] = self.force.get_Rain(self.tNow, self.elevation, self.inIDs)
 
+
+            # Initialize waveFlux at tStart
+            if self.tNow == self.input.tStart:
+                self.force.initWaveFlux(self.inIDs)
+
             # Load tectonic grid
             if not self.input.disp3d:
                 # Vertical displacements
@@ -366,10 +378,26 @@ class Model(object):
                 # Compute wave field and associated bottom current conditions
                 waveED,nactlay = self.wave.compute_wavesed(self.tNow, self.input, self.force,
                                                    self.elevation, actlay)
+
+                print("Maximum wave dep: ")
+                print(max(waveED))
+
+                # Wave-remobilized sediments sent to stream network if mobilized over steep slopes
+                slopeVal = 0.01
+                slopeBool = (self.slopeTIN > slopeVal).astype(int)
+                waveDep = waveED.clip(min=0) # keep positive values (deposition)
+                self.waveMobile = np.multiply(slopeBool,waveDep)
+                self.newWaveED = np.subtract(waveED, self.waveMobile)
+                self.force.waveFlux = np.multiply(self.waveMobile,self.FVmesh.control_volumes)/self.input.tWave
+                print("max wave flux: ")
+                print(max(self.force.waveFlux))
+                print("min wave flux: ")
+                print(min(self.force.waveFlux))
+
                 # Update elevation / cumulative changes based on wave-induced sediment transport
-                self.elevation += waveED
-                self.cumdiff  += waveED
-                self.wavediff  += waveED
+                self.elevation += self.newWaveED
+                self.cumdiff  += self.newWaveED
+                self.wavediff  += self.newWaveED
                 print("   - Compute wave-induced sediment transport %0.02f seconds" % (time.clock() - wavetime))
                 # Update carbonate active layer
                 if nactlay is not None:
@@ -438,12 +466,14 @@ class Model(object):
 
             # Create checkpoint files and write HDF5 output
             if self.tNow >= self.force.next_display:
+
                 if self.force.next_display > self.input.tStart:
                     outStrata = 1
+
                 checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow,
                                             self.FVmesh, self.tMesh, self.force, self.flow, self.rain,
                                             self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff,
-                                            self.outputStep, self.prop, self.mapero, self.cumflex)
+                                            self.outputStep, self.prop, self.slopeTIN, self.mapero, self.cumflex)
 
                 if self.straTIN is not None and self.outputStep % self.input.tmesh==0:
                     meshtime = time.clock()
@@ -479,7 +509,8 @@ class Model(object):
                         tEnd, self.force.next_wave, self.force.next_disp, self.force.next_rain,
                         self.next_carbStep])
 
-            self.tNow, self.elevation, self.cumdiff, self.cumhill, self.cumfail = buildFlux.sediment_flux(self.input, self.recGrid, self.hillslope, \
+            print("Returning slopeTIN in model.py")
+            self.tNow, self.elevation, self.cumdiff, self.cumhill, self.cumfail, self.slopeTIN = buildFlux.sediment_flux(self.input, self.recGrid, self.hillslope, \
                               self.FVmesh, self.tMesh, self.flow, self.force, self.rain, self.lGIDs, self.applyDisp, self.straTIN, self.mapero,  \
                               self.cumdiff, self.cumhill, self.cumfail, self.fillH, self.disp, self.inGIDs, self.elevation, self.tNow, tStop, verbose)
 
@@ -508,7 +539,7 @@ class Model(object):
             checkPoints.write_checkpoints(self.input, self.recGrid, self.lGIDs, self.inIDs, self.tNow, \
                                 self.FVmesh, self.tMesh, self.force, self.flow, self.rain, \
                                 self.elevation, self.fillH, self.cumdiff, self.cumhill, self.cumfail, self.wavediff, \
-                                self.outputStep, self.prop, self.mapero, self.cumflex)
+                                self.outputStep, self.prop, self.slopeTIN, self.mapero, self.cumflex)
             self.force.next_display += self.input.tDisplay
             self.outputStep += 1
             if self.straTIN is not None:
