@@ -389,6 +389,10 @@ class Model(object):
                 self.waveMobile = np.multiply(slopeBool,waveDep)
                 self.newWaveED = np.subtract(waveED, self.waveMobile)
                 self.force.waveFlux = np.multiply(self.waveMobile,self.FVmesh.control_volumes)/self.input.tWave
+                print("max wave flux: ")
+                print(max(self.force.waveFlux))
+                print("min wave flux: ")
+                print(min(self.force.waveFlux))
 
                 # Update elevation / cumulative changes based on wave-induced sediment transport
                 self.elevation += self.newWaveED

@@ -176,7 +176,7 @@ contains
               enddo loop0
               if(maxz>sealevel) maxz = sealevel
               if(maxz<elev(id)) maxz = elev(id)
-              diffprop = (0.9_8)/(1.0_8+exp(1500._8*(pySlp(id)-0.005_8)))
+              diffprop = ((0.9_8)/(1.0_8+exp(2000._8*(pySlp(id))))+0.005_8)
               vol = max(0.,diffprop*(maxz-elev(id))*area(id))
 
               if(it>max_it_cyc)then
